@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from "@/lib/api";
-import type { AuthConfig, AuthSessionPayload, WorkspaceMe } from "@/types/auth";
+import type { AuthConfig, AuthSessionPayload, WorkspaceMe } from "@/types";
 
 export async function getAuthConfig(): Promise<AuthConfig> {
   return apiGet<AuthConfig>("/api/v1/auth/config");
@@ -49,12 +49,6 @@ export async function resetPassword(input: {
 
 export async function verifyEmail(token: string): Promise<{ message: string }> {
   return apiPost<{ message: string }>("/api/v1/auth/verify-email", { token });
-}
-
-export async function resendVerification(email: string): Promise<{ message: string }> {
-  return apiPost<{ message: string }>("/api/v1/auth/resend-verification", {
-    email,
-  });
 }
 
 export function getOAuthUrl(provider: "google" | "github"): string {
