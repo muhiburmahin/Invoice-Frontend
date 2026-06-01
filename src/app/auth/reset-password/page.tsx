@@ -75,7 +75,7 @@ function ResetPasswordForm() {
     return (
       <p className="text-sm text-muted-foreground">
         Your password was updated.{" "}
-        <Link href="/auth/login" className="font-medium text-foreground hover:underline">
+        <Link href="/auth/login" className="font-medium text-brand hover:underline">
           Sign in
         </Link>
       </p>
@@ -112,7 +112,11 @@ function ResetPasswordForm() {
           </p>
         ) : null}
       </div>
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button
+        type="submit"
+        className="w-full bg-brand text-brand-foreground hover:bg-brand/90"
+        disabled={isSubmitting}
+      >
         {isSubmitting ? "Saving…" : "Reset password"}
       </Button>
     </form>

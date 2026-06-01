@@ -1,7 +1,7 @@
 import axios, { type AxiosError } from "axios";
 
 import { env } from "@/config/env";
-import type { ApiFailure, ApiSuccess } from "@/types";
+import type { ApiFailure, ApiSuccess, PaginatedMeta } from "@/types";
 
 export const api = axios.create({
   baseURL: env.apiBaseUrl,
@@ -22,6 +22,15 @@ export function getApiErrorMessage(error: unknown): string {
 export async function apiGet<T>(url: string): Promise<T> {
   const { data } = await api.get<ApiSuccess<T>>(url);
   return data.data;
+}
+
+export async function apiGetWithMeta<T>(url: string): Promise<{ data: T; meta: PaginatedMeta }> {
+  const { data: body } = await api.get<ApiSuccess<T>>(url);
+  const meta = body.meta as PaginatedMeta | undefined;
+  return {
+    data: body.data,
+    meta: meta ?? { page: 1, limit: 20, total: 0, totalPages: 0 },
+  };
 }
 
 export async function apiPost<T, B = unknown>(url: string, body?: B): Promise<T> {

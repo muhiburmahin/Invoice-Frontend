@@ -2,20 +2,16 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { apiGet } from "@/lib/api";
+import { dashboardService } from "@/services/dashboard.service";
 
-// TODO: Phase 5 — dedicated dashboard service
-export function useDashboard() {
+export const dashboardQueryKey = ["dashboard", "overview"] as const;
+
+export function useDashboard(options?: { enabled?: boolean }) {
   return useQuery({
-    queryKey: ["dashboard"],
-    queryFn: async () => {
-      const [invoices, clients, payments] = await Promise.all([
-        apiGet<unknown>("/api/v1/invoices/stats"),
-        apiGet<unknown>("/api/v1/clients/stats"),
-        apiGet<unknown>("/api/v1/payments/stats"),
-      ]);
-      return { invoices, clients, payments };
-    },
-    enabled: false,
+    queryKey: dashboardQueryKey,
+    queryFn: () => dashboardService.getOverview(),
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
+    enabled: options?.enabled ?? true,
   });
 }

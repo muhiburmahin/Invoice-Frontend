@@ -68,3 +68,23 @@ export type PaginatedMeta = {
   total: number;
   totalPages: number;
 };
+
+export type {
+  PortalBusiness,
+  PortalCheckoutResponse,
+  PortalInvoiceDetail,
+  PortalInvoiceDetailResponse,
+  PortalInvoiceListItem,
+  PortalMeta,
+} from "@/types/portal";
+
+export type {
+  BillingUsage,
+  BusinessProfile,
+  ClientStats,
+  DashboardOverview,
+  InvoiceListItem,
+  InvoiceStats,
+  NotificationItem,
+  PaymentStats,
+} from "@/types/dashboard";

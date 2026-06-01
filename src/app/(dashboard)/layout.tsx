@@ -1,5 +1,5 @@
+import { RequireAuth } from "@/components/modules/auth/require-auth";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { Navbar } from "@/components/layout/Navbar";
 
 export default function DashboardLayout({
   children,
@@ -9,13 +9,16 @@ export default function DashboardLayout({
   modal: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-full flex-1">
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Navbar />
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+    <RequireAuth>
+      <div className="flex min-h-0 flex-1">
+        <Sidebar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <main id="main-content" className="flex-1 p-4 md:p-6">
+            {children}
+          </main>
+        </div>
+        {modal}
       </div>
-      {modal}
-    </div>
+    </RequireAuth>
   );
 }

@@ -1,5 +1,8 @@
 import { apiGet, apiPost } from "@/lib/api";
+import { env } from "@/config/env";
 import type { AuthConfig, AuthSessionPayload, WorkspaceMe } from "@/types";
+
+const OAUTH_CALLBACK_PATH = "/auth/callback";
 
 export async function getAuthConfig(): Promise<AuthConfig> {
   return apiGet<AuthConfig>("/api/v1/auth/config");
@@ -51,7 +54,39 @@ export async function verifyEmail(token: string): Promise<{ message: string }> {
   return apiPost<{ message: string }>("/api/v1/auth/verify-email", { token });
 }
 
-export function getOAuthUrl(provider: "google" | "github"): string {
-  const base = typeof window !== "undefined" ? window.location.origin : "";
-  return `${base}/api/v1/auth/social/${provider}`;
+export async function resendVerification(email: string): Promise<{ message: string }> {
+  return apiPost<{ message: string }>("/api/v1/auth/resend-verification", { email });
+}
+
+/** OAuth start URL — backend validates redirect against CLIENT_URL / CORS */
+export function getOAuthUrl(
+  provider: "google" | "github",
+  options?: { returnTo?: string },
+): string {
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : env.appUrl;
+  const callback = new URL(OAUTH_CALLBACK_PATH, origin);
+  if (options?.returnTo) {
+    callback.searchParams.set("from", options.returnTo);
+  }
+  const params = new URLSearchParams({
+    redirect: callback.toString(),
+  });
+  return `${origin}/api/v1/auth/social/${provider}?${params.toString()}`;
+}
+
+export async function getOAuthUrlAsync(
+  provider: "google" | "github",
+  options?: { returnTo?: string },
+): Promise<string> {
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : env.appUrl;
+  const callback = new URL(OAUTH_CALLBACK_PATH, origin);
+  if (options?.returnTo) {
+    callback.searchParams.set("from", options.returnTo);
+  }
+  const data = await apiGet<{ url: string; provider: string }>(
+    `/api/v1/auth/social/${provider}/url?redirect=${encodeURIComponent(callback.toString())}`,
+  );
+  return data.url;
 }

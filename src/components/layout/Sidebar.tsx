@@ -2,58 +2,57 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  FileText,
-  LayoutDashboard,
-  RefreshCw,
-  Settings,
-  Users,
-  Wallet,
-} from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { isNavActive, mainNavItems } from "@/config/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/clients", label: "Clients", icon: Users },
-  { href: "/invoices", label: "Invoices", icon: FileText },
-  { href: "/payments", label: "Payments", icon: Wallet },
-  { href: "/recurring", label: "Recurring", icon: RefreshCw, badge: "PRO" },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { plan } = useAuth();
+  const { plan, workspace } = useAuth();
 
   return (
-    <aside className="hidden h-full w-64 shrink-0 flex-col border-r bg-sidebar md:flex">
-      <div className="flex h-14 items-center border-b px-4">
-        <Link href="/" className="font-semibold">
+    <aside className="hidden h-full w-64 shrink-0 flex-col border-r border-brand-secondary/40 bg-sidebar md:flex">
+      <div className="flex h-14 items-center border-b border-brand-secondary/40 px-4">
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-brand">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-brand text-sm text-brand-foreground">
+            In
+          </span>
           Invoice
         </Link>
       </div>
-      <nav className="flex flex-1 flex-col gap-1 p-3">
-        {navItems.map(({ href, label, icon: Icon, badge }) => {
-          const active =
-            href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+      <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="Main navigation">
+        {mainNavItems.map(({ href, label, icon: Icon, badge, description }) => {
+          const active = isNavActive(pathname, href);
           return (
             <Link
               key={href}
               href={href}
+              title={description}
               className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "group flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                 active
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/60",
+                  ? "bg-brand text-brand-foreground shadow-sm shadow-brand/20"
+                  : "text-sidebar-foreground hover:bg-brand-secondary/60 hover:text-brand",
               )}
             >
-              <Icon className="size-4" />
-              {label}
+              <Icon
+                className={cn(
+                  "size-4 shrink-0",
+                  active ? "text-brand-foreground" : "text-muted-foreground group-hover:text-brand",
+                )}
+              />
+              <span className="flex-1">{label}</span>
               {badge ? (
-                <Badge variant="secondary" className="ml-auto text-[10px]">
+                <Badge
+                  variant={active ? "secondary" : "outline"}
+                  className={cn(
+                    "text-[10px]",
+                    active && "border-brand-foreground/30 bg-brand-foreground/20 text-brand-foreground",
+                  )}
+                >
                   {badge}
                 </Badge>
               ) : null}
@@ -61,10 +60,17 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <div className="border-t p-3">
-        <Badge variant="outline" className="w-full justify-center">
-          {plan} plan
-        </Badge>
+
+      <div className="space-y-2 border-t border-brand-secondary/40 p-3">
+        <div className="rounded-lg bg-brand-secondary/50 px-3 py-2 text-center">
+          <p className="text-xs text-muted-foreground">Current plan</p>
+          <p className="font-semibold text-brand">{plan} plan</p>
+        </div>
+        {workspace && !workspace.user.isVerified ? (
+          <p className="text-center text-xs text-warning">
+            Verify your email to unlock all features
+          </p>
+        ) : null}
       </div>
     </aside>
   );
