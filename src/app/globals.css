@@ -278,4 +278,50 @@
     background-size: 200% 100%;
     animation: home-shimmer 8s linear infinite;
   }
+
+  .marketing-card-hover {
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .marketing-card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 12px 28px -8px color-mix(in oklch, var(--brand) 25%, transparent),
+      0 4px 12px -4px color-mix(in oklch, var(--foreground) 8%, transparent);
+  }
+
+  .marketing-glow-pulse {
+    animation: marketing-glow-pulse 4s ease-in-out infinite;
+  }
+
+  .marketing-gradient-shift {
+    background-size: 200% 200%;
+    animation: marketing-gradient-shift 12s ease infinite;
+  }
+}
+
+@keyframes marketing-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes marketing-gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

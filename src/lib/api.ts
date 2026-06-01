@@ -12,6 +12,13 @@ export const api = axios.create({
 export function getApiErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
     const data = error.response?.data as ApiFailure | undefined;
+    if (data?.details?.errors?.length) {
+      return data.details.errors.join(". ");
+    }
+    if (data?.details?.fieldErrors) {
+      const messages = Object.values(data.details.fieldErrors).flat();
+      if (messages.length) return messages.join(". ");
+    }
     if (data?.message) return data.message;
     return error.message;
   }

@@ -8,10 +8,12 @@ import { toast } from "sonner";
 import { AuthCard } from "@/components/layout/auth-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AUTH_ROUTES } from "@/config/public-routes";
+import { useAuth } from "@/hooks/useAuth";
 import { getApiErrorMessage } from "@/lib/api";
 import { verifyEmail } from "@/services/auth.service";
 
 function VerifyEmailContent() {
+  const { refresh } = useAuth();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
   const pending = searchParams.get("pending") === "1";
@@ -37,6 +39,7 @@ function VerifyEmailContent() {
       try {
         const result = await verifyEmail(token);
         if (!cancelled) {
+          await refresh();
           setStatus("ok");
           setMessage(result.message);
           toast.success("Email verified");
@@ -52,7 +55,7 @@ function VerifyEmailContent() {
     return () => {
       cancelled = true;
     };
-  }, [pending, token]);
+  }, [pending, refresh, token]);
 
   if (pending && !token) {
     return (
@@ -94,9 +97,20 @@ function VerifyEmailContent() {
           Resend verification email
         </Link>
       ) : null}
-      <Link href={AUTH_ROUTES.login} className="font-medium text-brand hover:underline">
+      <Link
+        href={AUTH_ROUTES.login}
+        className="block font-medium text-brand hover:underline"
+      >
         Continue to sign in
       </Link>
+      {status === "ok" ? (
+        <Link
+          href="/dashboard"
+          className="block font-medium text-brand hover:underline"
+        >
+          Go to dashboard
+        </Link>
+      ) : null}
     </div>
   );
 }

@@ -78,6 +78,12 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
     store.login = async (input) => {
       const result = await loginApi(input);
       setSession(result);
+
+      if (!result.isVerified) {
+        router.push(`${AUTH_ROUTES.verifyEmail}?pending=1`);
+        return;
+      }
+
       await refresh();
       const from = searchParams.get("from");
       const destination =

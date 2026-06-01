@@ -1,18 +1,11 @@
-import { MarketingPageShell } from "@/components/layout/MarketingPageShell";
+import { FeaturesPage } from "@/components/modules/features/FeaturesPage";
 
-export default function FeaturesPage() {
-  return (
-    <MarketingPageShell
-      title="Features"
-      description="Everything you need to run invoicing for your business or freelance practice."
-    >
-      <ul className="list-inside list-disc space-y-2 text-sm text-muted-foreground">
-        <li>Professional invoices with PDF export</li>
-        <li>Client management & client portal</li>
-        <li>Payment tracking & Stripe checkout</li>
-        <li>Recurring invoices & reminders</li>
-        <li>Business branding & multi-currency</li>
-      </ul>
-    </MarketingPageShell>
-  );
+export const metadata = {
+  title: "Features | Invoice SaaS",
+  description:
+    "Invoicing, client portal, Stripe payments, recurring billing, reminders, and branding — all in one place.",
+};
+
+export default function Page() {
+  return <FeaturesPage />;
 }

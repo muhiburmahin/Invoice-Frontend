@@ -45,3 +45,43 @@ export type MarketingHomeData = {
   trustedLabels: string[];
   faq: MarketingFaqItem[];
 };
+
+export type MarketingFeature = {
+  id: string;
+  title: string;
+  description: string;
+  category: "invoicing" | "clients" | "payments" | "automation" | "branding";
+  plans: ("FREE" | "PRO" | "ENTERPRISE")[];
+  highlights: string[];
+  available: boolean;
+};
+
+export type MarketingFeatureCategory = {
+  id: string;
+  label: string;
+  description: string;
+};
+
+export type MarketingComparisonRow = {
+  id: string;
+  label: string;
+  values: Record<"FREE" | "PRO" | "ENTERPRISE", string>;
+};
+
+export type MarketingIntegration = {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+};
+
+export type MarketingFeaturesData = {
+  stats: MarketingStats;
+  providers: MarketingProviders;
+  plans: MarketingPlan[];
+  categories: MarketingFeatureCategory[];
+  features: MarketingFeature[];
+  comparison: MarketingComparisonRow[];
+  integrations: MarketingIntegration[];
+  faq: MarketingFaqItem[];
+};

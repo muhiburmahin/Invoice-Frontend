@@ -9,6 +9,10 @@ export type ApiFailure = {
   message: string;
   code?: string;
   requestId?: string;
+  details?: {
+    errors?: string[];
+    fieldErrors?: Record<string, string[]>;
+  };
 };
 
 export type SubscriptionPlan = "FREE" | "PRO" | "ENTERPRISE";

@@ -1,17 +1,43 @@
 import { z } from "zod";
 
-/** Auth — mirror backend auth.validation */
+const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .max(128, "Password cannot exceed 128 characters")
+  .refine((val) => !/\s/.test(val), { message: "Password must not contain spaces" })
+  .refine((val) => /[a-z]/.test(val), {
+    message: "Password must contain at least one lowercase letter (a-z)",
+  })
+  .refine((val) => /[A-Z]/.test(val), {
+    message: "Password must contain at least one uppercase letter (A-Z)",
+  })
+  .refine((val) => /[0-9]/.test(val), {
+    message: "Password must contain at least one number (0-9)",
+  })
+  .refine((val) => /[!@#$%^&*(),.?":{}|<>_\-+=/\\[\];'`~]/.test(val), {
+    message: "Password must contain at least one special character (e.g. !@#$%^&*)",
+  });
+
+/** Auth — aligned with backend auth.validation */
 export const loginSchema = z.object({
-  email: z.string().email("Enter a valid email"),
+  email: z.string().trim().email("Enter a valid email"),
   password: z.string().min(1, "Password is required"),
   rememberMe: z.boolean().optional(),
 });
 
 export const registerSchema = z
   .object({
-    name: z.string().min(2, "Name is required"),
-    email: z.string().email("Enter a valid email"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    name: z
+      .string()
+      .trim()
+      .min(2, "Name must be at least 2 characters")
+      .max(80, "Name cannot exceed 80 characters")
+      .regex(/^[\p{L}\p{N} .'-]+$/u, {
+        message:
+          "Name can only contain letters, numbers, spaces, dots, apostrophes and hyphens",
+      }),
+    email: z.string().trim().email("Enter a valid email"),
+    password: passwordSchema,
     confirmPassword: z.string().min(1, "Confirm your password"),
     acceptTerms: z.boolean().refine((v) => v === true, {
       message: "You must accept the terms",
@@ -23,12 +49,12 @@ export const registerSchema = z
   });
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email("Enter a valid email"),
+  email: z.string().trim().email("Enter a valid email"),
 });
 
 export const resetPasswordSchema = z
   .object({
-    newPassword: z.string().min(8, "Password must be at least 8 characters"),
+    newPassword: passwordSchema,
     confirmPassword: z.string().min(1, "Confirm your password"),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {

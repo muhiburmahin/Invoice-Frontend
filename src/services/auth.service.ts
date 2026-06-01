@@ -58,35 +58,52 @@ export async function resendVerification(email: string): Promise<{ message: stri
   return apiPost<{ message: string }>("/api/v1/auth/resend-verification", { email });
 }
 
-/** OAuth start URL — backend validates redirect against CLIENT_URL / CORS */
+function buildOAuthCallbackUrl(returnTo?: string): string {
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : env.appUrl;
+  const callback = new URL(OAUTH_CALLBACK_PATH, origin);
+  if (returnTo) {
+    callback.searchParams.set("from", returnTo);
+  }
+  return callback.toString();
+}
+
+function apiAuthBase(): string {
+  const base = env.apiBaseUrl?.replace(/\/$/, "");
+  if (base) return base;
+  return typeof window !== "undefined"
+    ? `${window.location.protocol}//${window.location.hostname}:5000`
+    : "http://localhost:5000";
+}
+
+/** OAuth start URL — hits the Express API (not the Next.js origin). */
 export function getOAuthUrl(
   provider: "google" | "github",
   options?: { returnTo?: string },
 ): string {
-  const origin =
-    typeof window !== "undefined" ? window.location.origin : env.appUrl;
-  const callback = new URL(OAUTH_CALLBACK_PATH, origin);
-  if (options?.returnTo) {
-    callback.searchParams.set("from", options.returnTo);
-  }
   const params = new URLSearchParams({
-    redirect: callback.toString(),
+    redirect: buildOAuthCallbackUrl(options?.returnTo),
   });
-  return `${origin}/api/v1/auth/social/${provider}?${params.toString()}`;
+  const base = apiAuthBase();
+  const path =
+    provider === "google"
+      ? `${base}/api/v1/auth/google`
+      : `${base}/api/v1/auth/social/${provider}`;
+  return `${path}?${params.toString()}`;
 }
 
 export async function getOAuthUrlAsync(
   provider: "google" | "github",
   options?: { returnTo?: string },
 ): Promise<string> {
-  const origin =
-    typeof window !== "undefined" ? window.location.origin : env.appUrl;
-  const callback = new URL(OAUTH_CALLBACK_PATH, origin);
-  if (options?.returnTo) {
-    callback.searchParams.set("from", options.returnTo);
+  const redirect = encodeURIComponent(buildOAuthCallbackUrl(options?.returnTo));
+  const path =
+    provider === "google"
+      ? `/api/v1/auth/google?redirect=${redirect}`
+      : `/api/v1/auth/social/${provider}/url?redirect=${redirect}`;
+  if (provider === "google") {
+    return `${apiAuthBase()}${path}`;
   }
-  const data = await apiGet<{ url: string; provider: string }>(
-    `/api/v1/auth/social/${provider}/url?redirect=${encodeURIComponent(callback.toString())}`,
-  );
+  const data = await apiGet<{ url: string; provider: string }>(path);
   return data.url;
 }
