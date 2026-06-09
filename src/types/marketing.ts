@@ -22,6 +22,12 @@ export type MarketingTestimonial = {
 export type MarketingFaqItem = {
   q: string;
   a: string;
+  category?: string;
+};
+
+export type MarketingFaqCategory = {
+  id: string;
+  label: string;
 };
 
 export type MarketingStats = {
@@ -83,5 +89,20 @@ export type MarketingFeaturesData = {
   features: MarketingFeature[];
   comparison: MarketingComparisonRow[];
   integrations: MarketingIntegration[];
+  faq: MarketingFaqItem[];
+};
+
+export type MarketingPricingData = {
+  stats: MarketingStats;
+  providers: MarketingProviders;
+  plans: MarketingPlan[];
+  comparison: MarketingComparisonRow[];
+  highlights: string[];
+  faq: MarketingFaqItem[];
+};
+
+export type MarketingFaqPageData = {
+  providers: MarketingProviders;
+  categories: MarketingFaqCategory[];
   faq: MarketingFaqItem[];
 };

@@ -11,7 +11,8 @@ export function useDashboard(options?: { enabled?: boolean }) {
     queryKey: dashboardQueryKey,
     queryFn: () => dashboardService.getOverview(),
     staleTime: 60_000,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
+    retry: 1,
     enabled: options?.enabled ?? true,
   });
 }

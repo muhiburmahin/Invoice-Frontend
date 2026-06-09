@@ -1,8 +1,20 @@
-﻿export default function Page() {
+﻿import { AccountSettings } from "@/components/modules/settings/AccountSettings";
+
+export const metadata = {
+  title: "Account",
+  description: "Profile, password, sessions, and account deletion.",
+};
+
+export default function Page() {
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-semibold">Account</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Coming soon</p>
-    </main>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Account</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Profile, security, and active sessions.
+        </p>
+      </div>
+      <AccountSettings />
+    </div>
   );
 }

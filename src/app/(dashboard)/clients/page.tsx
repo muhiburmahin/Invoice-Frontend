@@ -1,8 +1,10 @@
-﻿export default function Page() {
-  return (
-    <main className="p-6">
-      <h1 className="text-2xl font-semibold">Clients</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Coming soon</p>
-    </main>
-  );
+﻿import { ClientsPage } from "@/components/modules/clients/ClientsPage";
+
+export const metadata = {
+  title: "Clients",
+  description: "Manage your customers and client portal access.",
+};
+
+export default function Page() {
+  return <ClientsPage />;
 }

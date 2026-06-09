@@ -1,6 +1,7 @@
-import { apiGet, apiPost } from "@/lib/api";
+import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 import { env } from "@/config/env";
 import type { AuthConfig, AuthSessionPayload, WorkspaceMe } from "@/types";
+import type { UpdateProfileResponse, UserSession } from "@/types/account";
 
 const OAUTH_CALLBACK_PATH = "/auth/callback";
 
@@ -56,6 +57,46 @@ export async function verifyEmail(token: string): Promise<{ message: string }> {
 
 export async function resendVerification(email: string): Promise<{ message: string }> {
   return apiPost<{ message: string }>("/api/v1/auth/resend-verification", { email });
+}
+
+export async function updateProfile(input: {
+  name?: string;
+  avatar?: string;
+}): Promise<UpdateProfileResponse> {
+  return apiPatch<UpdateProfileResponse>("/api/v1/auth/profile", input);
+}
+
+export async function changePassword(input: {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+  revokeOtherSessions?: boolean;
+}): Promise<{ message: string }> {
+  return apiPost<{ message: string }>("/api/v1/auth/change-password", input);
+}
+
+export async function deleteAccount(input: {
+  password?: string;
+  confirm: "DELETE";
+}): Promise<{ message: string }> {
+  return apiDelete<{ message: string }>("/api/v1/auth/account", input);
+}
+
+export async function listSessions(): Promise<{ sessions: UserSession[] }> {
+  return apiGet<{ sessions: UserSession[] }>("/api/v1/auth/sessions");
+}
+
+export async function revokeSession(id: string): Promise<{ message: string }> {
+  return apiDelete<{ message: string }>(`/api/v1/auth/sessions/${id}`);
+}
+
+export async function revokeOtherSessions(): Promise<{
+  revoked: number;
+  message: string;
+}> {
+  return apiDelete<{ revoked: number; message: string }>(
+    "/api/v1/auth/sessions/others",
+  );
 }
 
 function buildOAuthCallbackUrl(returnTo?: string): string {

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Home } from "lucide-react";
 
 import { isNavActive, mainNavItems } from "@/config/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -62,6 +63,13 @@ export function Sidebar() {
       </nav>
 
       <div className="space-y-2 border-t border-brand-secondary/40 p-3">
+        <Link
+          href="/"
+          className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-brand-secondary/60 hover:text-brand"
+        >
+          <Home className="size-4 shrink-0 text-muted-foreground" />
+          Website home
+        </Link>
         <div className="rounded-lg bg-brand-secondary/50 px-3 py-2 text-center">
           <p className="text-xs text-muted-foreground">Current plan</p>
           <p className="font-semibold text-brand">{plan} plan</p>

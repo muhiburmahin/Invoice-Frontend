@@ -1,8 +1,10 @@
-﻿export default function Page() {
-  return (
-    <main className="p-6">
-      <h1 className="text-2xl font-semibold">Admin</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Coming soon</p>
-    </main>
-  );
+﻿import { AdminDashboard } from "@/components/modules/admin/AdminDashboard";
+
+export const metadata = {
+  title: "Admin",
+  description: "Platform overview and management.",
+};
+
+export default function Page() {
+  return <AdminDashboard />;
 }

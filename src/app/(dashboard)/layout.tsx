@@ -9,16 +9,16 @@ export default function DashboardLayout({
   modal: React.ReactNode;
 }) {
   return (
-    <RequireAuth>
-      <div className="flex min-h-0 flex-1">
-        <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
+    <div className="flex min-h-0 flex-1">
+      <Sidebar />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <RequireAuth>
           <main id="main-content" className="flex-1 p-4 md:p-6">
             {children}
           </main>
-        </div>
-        {modal}
+        </RequireAuth>
       </div>
-    </RequireAuth>
+      {modal}
+    </div>
   );
 }

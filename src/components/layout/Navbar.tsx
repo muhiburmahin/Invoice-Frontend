@@ -16,6 +16,7 @@ import {
   Plus,
   Search,
   Settings,
+  Shield,
   User,
   Users,
   X,
@@ -41,6 +42,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -48,6 +50,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isStaff } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 import type { NotificationItem } from "@/types";
 
@@ -58,6 +61,7 @@ const quickCreateLinks = [
 ];
 
 const appSearchRoutes = [
+  { href: "/", label: "Website home", keywords: "marketing landing homepage public" },
   { href: DASHBOARD_HOME, label: "Dashboard", keywords: "home overview" },
   { href: "/clients", label: "Clients", keywords: "customers" },
   { href: "/invoices", label: "Invoices", keywords: "bills" },
@@ -133,6 +137,7 @@ function ProfileMenu({
 }) {
   const router = useRouter();
   const { user, logout, plan } = useAuth();
+  const staff = isStaff(user?.role);
   const initials = getInitials(user?.name);
 
   return (
@@ -163,18 +168,24 @@ function ProfileMenu({
         }
       />
       <DropdownMenuContent align={align} className="w-64">
-        <DropdownMenuLabel>
-          <div className="flex flex-col gap-1.5 py-0.5">
-            <span className="truncate font-medium">{user?.name}</span>
-            <span className="truncate text-xs font-normal text-muted-foreground">
-              {user?.email}
-            </span>
-            <Badge variant="secondary" className="w-fit text-[10px] uppercase tracking-wide">
-              {plan} plan
-            </Badge>
-          </div>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            <div className="flex flex-col gap-1.5 py-0.5">
+              <span className="truncate font-medium">{user?.name}</span>
+              <span className="truncate text-xs font-normal text-muted-foreground">
+                {user?.email}
+              </span>
+              <Badge variant="secondary" className="w-fit text-[10px] uppercase tracking-wide">
+                {plan} plan
+              </Badge>
+            </div>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => router.push("/")}>
+          <Home className="size-4" />
+          Website home
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push(DASHBOARD_HOME)}>
           <LayoutDashboard className="size-4" />
           Dashboard
@@ -191,6 +202,12 @@ function ProfileMenu({
           <Settings className="size-4" />
           Settings
         </DropdownMenuItem>
+        {staff ? (
+          <DropdownMenuItem onClick={() => router.push("/admin")}>
+            <Shield className="size-4" />
+            Admin console
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => void logout()}
@@ -411,7 +428,9 @@ function HelpMenu() {
         }
       />
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuLabel>Help</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Help</DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => window.open("/faq", "_self")}>
           <CircleHelp className="size-4" />
@@ -468,14 +487,16 @@ function NotificationBell({
         }
       />
       <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="flex items-center justify-between">
-          Notifications
-          {unread > 0 ? (
-            <Badge variant="secondary" className="text-[10px]">
-              {unread} new
-            </Badge>
-          ) : null}
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex items-center justify-between">
+            Notifications
+            {unread > 0 ? (
+              <Badge variant="secondary" className="text-[10px]">
+                {unread} new
+              </Badge>
+            ) : null}
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         {notifications.length === 0 ? (
           <p className="px-2 py-6 text-center text-sm text-muted-foreground">
@@ -800,7 +821,9 @@ function AppNavbar() {
             }
           />
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Quick create</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Quick create</DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             {quickCreateLinks.map((item) => (
               <DropdownMenuItem key={item.href} onClick={() => router.push(item.href)}>

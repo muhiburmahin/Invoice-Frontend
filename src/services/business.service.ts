@@ -1,8 +1,9 @@
 ﻿import { apiGet, apiPatch } from "@/lib/api";
+import type { Business, CurrencyOption, UpdateBusinessInput } from "@/types/business";
 
-// TODO: Phase 2
 export const businessService = {
-  get: () => apiGet<unknown>("/api/v1/business"),
-  update: (body: unknown) => apiPatch<unknown>("/api/v1/business", body),
-  currencies: () => apiGet<unknown>("/api/v1/business/currencies"),
+  get: () => apiGet<{ business: Business }>("/api/v1/business"),
+  update: (body: UpdateBusinessInput) =>
+    apiPatch<{ business: Business; message?: string }>("/api/v1/business", body),
+  currencies: () => apiGet<{ currencies: CurrencyOption[] }>("/api/v1/business/currencies"),
 };

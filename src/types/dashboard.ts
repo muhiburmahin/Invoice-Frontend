@@ -1,10 +1,16 @@
 import type { PaginatedMeta, SubscriptionPlan } from "@/types";
 
+export type ChartMonthPoint = {
+  label: string;
+  key: string;
+};
+
 export type InvoiceStats = {
   total: number;
   thisMonth: number;
   outstandingBalance: number;
   byStatus: Record<string, number>;
+  monthlyCreated?: (ChartMonthPoint & { count: number })[];
   plan: SubscriptionPlan;
   usage: {
     invoicesThisMonth: number;
@@ -34,6 +40,7 @@ export type PaymentStats = {
   completedThisMonth: number;
   pendingTotal: number;
   byMethod: Record<string, { count: number; amount: number }>;
+  monthlyTrend?: (ChartMonthPoint & { amount: number })[];
 };
 
 export type BillingUsage = {
@@ -89,4 +96,7 @@ export type DashboardOverview = {
   notifications: NotificationItem[];
   unreadCount: number;
   business: BusinessProfile | null;
+  /** True when one or more dashboard API calls failed (degraded data). */
+  partialLoad?: boolean;
+  failedRequests?: number;
 };

@@ -4,13 +4,16 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRight,
+  ExternalLink,
   FileText,
   Plus,
   RefreshCw,
+  Shield,
   Sparkles,
   Users,
 } from "lucide-react";
 
+import { PlatformCharts } from "@/components/modules/admin/charts/PlatformCharts";
 import { RecentInvoices } from "@/components/modules/dashboard/RecentInvoices";
 import { RevenueChart } from "@/components/modules/dashboard/RevenueChart";
 import { InvoiceStatusChart } from "@/components/modules/dashboard/InvoiceStatusChart";
@@ -26,13 +29,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { usePlatformStats } from "@/hooks/useAdmin";
 import { useAuth } from "@/hooks/useAuth";
 import { useDashboard } from "@/hooks/useDashboard";
+import { isStaff } from "@/lib/roles";
 import { formatCurrency } from "@/lib/utils";
 
 export function DashboardHome() {
   const { user, plan, workspace } = useAuth();
   const { data, isLoading, isError, refetch, isFetching } = useDashboard();
+  const staffUser = isStaff(user?.role);
+  const { data: platformData } = usePlatformStats({ enabled: staffUser });
 
   if (isLoading) {
     return <LoadingSkeleton rows={8} />;
@@ -43,7 +50,7 @@ export function DashboardHome() {
       <Card className="border-destructive/50">
         <CardContent className="flex flex-col items-center gap-4 py-12">
           <p className="text-sm text-muted-foreground">
-            Could not load dashboard. Check that the API is running.
+            Could not load dashboard. Check that the API is running on port 5000.
           </p>
           <Button
             onClick={() => void refetch()}
@@ -63,6 +70,22 @@ export function DashboardHome() {
 
   return (
     <div className="space-y-8 pb-8">
+      {data.partialLoad ? (
+        <Card className="border-warning/40 bg-warning/5">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
+            <p className="text-sm text-muted-foreground">
+              Some dashboard data could not be loaded
+              {data.failedRequests ? ` (${data.failedRequests} requests failed)` : ""}.
+              Make sure the backend is running, then refresh.
+            </p>
+            <Button variant="outline" size="sm" onClick={() => void refetch()}>
+              <RefreshCw className="size-4" />
+              Refresh
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
+
       {/* Section 1: Welcome */}
       <section className="relative overflow-hidden rounded-2xl border border-brand-secondary/50 bg-gradient-to-br from-brand-secondary/40 via-background to-brand-accent/10 p-6 md:p-8">
         <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -157,8 +180,35 @@ export function DashboardHome() {
       {/* Section 4 & 5: Charts */}
       <section className="grid gap-6 lg:grid-cols-2">
         <RevenueChart stats={data.paymentStats} currency={currency} />
-        <InvoiceStatusChart byStatus={data.invoiceStats.byStatus} />
+        <InvoiceStatusChart
+          byStatus={data.invoiceStats.byStatus}
+          monthlyCreated={data.invoiceStats.monthlyCreated}
+        />
       </section>
+
+      {staffUser && platformData?.stats ? (
+        <section className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Shield className="size-5 text-brand" />
+              <div>
+                <h3 className="text-lg font-semibold tracking-tight">Platform overview</h3>
+                <p className="text-sm text-muted-foreground">
+                  Super-admin metrics across all users
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
+            >
+              Full admin panel
+              <ExternalLink className="size-3.5" />
+            </Link>
+          </div>
+          <PlatformCharts stats={platformData.stats} />
+        </section>
+      ) : null}
 
       {/* Section 6: Overdue alert */}
       {data.overdueInvoices.length > 0 ? (

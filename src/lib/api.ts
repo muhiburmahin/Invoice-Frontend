@@ -50,8 +50,8 @@ export async function apiPatch<T, B = unknown>(url: string, body?: B): Promise<T
   return data.data;
 }
 
-export async function apiDelete<T>(url: string): Promise<T> {
-  const { data } = await api.delete<ApiSuccess<T>>(url);
+export async function apiDelete<T, B = unknown>(url: string, body?: B): Promise<T> {
+  const { data } = await api.delete<ApiSuccess<T>>(url, body ? { data: body } : undefined);
   return data.data;
 }
 

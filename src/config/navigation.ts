@@ -89,6 +89,8 @@ export const routeLabels: Record<string, string> = {
   "/settings/notifications": "Notifications",
   "/admin": "Admin",
   "/admin/users": "Users",
+  "/admin/activity-logs": "Activity logs",
+  "/admin/jobs": "Scheduled jobs",
 };
 
 export function getPageTitle(pathname: string): string {

@@ -20,57 +20,74 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams();
   const { setSession, setWorkspace, setLoading, reset } = useAuthStore();
 
-  const refresh = useCallback(async () => {
-    try {
-      const me = await getAuthMe();
-      setSession(me);
-    } catch (error) {
-      if (isUnauthorized(error)) {
-        try {
-          await logoutApi();
-        } catch {
-          /* clear stale cookies if backend allows */
-        }
-        reset();
-        return;
-      }
-      throw error;
-    }
+  const hydrateSession = useCallback(
+    async (options?: { clearOnUnauthorized?: boolean }) => {
+      const clearOnUnauthorized = options?.clearOnUnauthorized ?? true;
 
-    try {
-      const ws = await getWorkspaceMe();
-      setWorkspace(ws);
-    } catch {
-      setWorkspace(null);
-    }
-  }, [reset, setSession, setWorkspace]);
-
-  // Only validate session on protected routes — public pages stay reachable without redirects.
-  useEffect(() => {
-    if (!isProtectedRoute(pathname)) {
-      setLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-    setLoading(true);
-
-    (async () => {
       try {
-        await refresh();
+        const me = await getAuthMe();
+        setSession(me);
       } catch (error) {
-        if (!cancelled && isUnauthorized(error)) {
-          reset();
+        if (isUnauthorized(error)) {
+          if (clearOnUnauthorized) {
+            reset();
+          }
+          return false;
         }
-      } finally {
-        if (!cancelled) setLoading(false);
+        throw error;
       }
-    })();
+
+      try {
+        const ws = await getWorkspaceMe();
+        setWorkspace(ws);
+      } catch {
+        setWorkspace(null);
+      }
+
+      return true;
+    },
+    [reset, setSession, setWorkspace],
+  );
+
+  const refresh = useCallback(async () => {
+    await hydrateSession({ clearOnUnauthorized: true });
+  }, [hydrateSession]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const protectedRoute = isProtectedRoute(pathname);
+
+    if (protectedRoute) {
+      setLoading(true);
+
+      (async () => {
+        try {
+          await hydrateSession({ clearOnUnauthorized: true });
+        } catch {
+          if (!cancelled && !useAuthStore.getState().session) {
+            reset();
+          }
+        } finally {
+          if (!cancelled) setLoading(false);
+        }
+      })();
+    } else {
+      setLoading(false);
+
+      // Keep session alive on marketing/home pages — cookies may still be valid.
+      void (async () => {
+        try {
+          await hydrateSession({ clearOnUnauthorized: false });
+        } catch {
+          /* network errors on public pages should not sign the user out */
+        }
+      })();
+    }
 
     return () => {
       cancelled = true;
     };
-  }, [pathname, refresh, reset, setLoading]);
+  }, [hydrateSession, pathname, reset, setLoading]);
 
   useEffect(() => {
     const store = useAuthStore.getState();

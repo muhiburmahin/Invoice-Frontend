@@ -1,11 +1,36 @@
 ﻿import { apiGet, apiPost } from "@/lib/api";
+import type {
+  BillingMeta,
+  BillingSubscriptionResponse,
+  BillingUsageResponse,
+  UpgradeablePlan,
+} from "@/types/billing";
 
-// TODO: Phase 7
+function billingReturnUrl(path: string): string {
+  if (typeof window === "undefined") return path;
+  return `${window.location.origin}${path}`;
+}
+
 export const billingService = {
-  meta: () => apiGet<unknown>("/api/v1/billing/meta"),
-  subscription: () => apiGet<unknown>("/api/v1/billing/subscription"),
-  usage: () => apiGet<unknown>("/api/v1/billing/usage"),
-  checkout: (plan: "PRO" | "ENTERPRISE") =>
-    apiPost<{ url: string }>("/api/v1/billing/checkout", { plan }),
-  portal: () => apiPost<{ url: string }>("/api/v1/billing/portal"),
+  meta: () => apiGet<BillingMeta>("/api/v1/billing/meta"),
+
+  subscription: () =>
+    apiGet<BillingSubscriptionResponse>("/api/v1/billing/subscription"),
+
+  usage: () => apiGet<BillingUsageResponse>("/api/v1/billing/usage"),
+
+  checkout: (plan: UpgradeablePlan) =>
+    apiPost<{ checkoutUrl: string; sessionId: string }>(
+      "/api/v1/billing/checkout",
+      {
+        plan,
+        successUrl: `${billingReturnUrl("/settings/billing")}?checkout=success`,
+        cancelUrl: `${billingReturnUrl("/settings/billing")}?checkout=cancelled`,
+      },
+    ),
+
+  portal: () =>
+    apiPost<{ portalUrl: string }>("/api/v1/billing/portal", {
+      returnUrl: billingReturnUrl("/settings/billing"),
+    }),
 };

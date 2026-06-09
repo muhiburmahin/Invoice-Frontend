@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Home, Menu, X } from "lucide-react";
 import { useState } from "react";
 
 import { isNavActive, mainNavItems } from "@/config/navigation";
@@ -61,6 +61,14 @@ export function MobileSidebar() {
                 </Link>
               );
             })}
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              className="mb-1 flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-brand-secondary/60"
+            >
+              <Home className="size-4" />
+              Website home
+            </Link>
             <div className="mt-3 rounded-lg bg-brand-secondary/50 px-3 py-2 text-center text-sm">
               <span className="text-muted-foreground">Plan: </span>
               <span className="font-semibold text-brand">{plan}</span>
