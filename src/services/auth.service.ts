@@ -112,9 +112,11 @@ function buildOAuthCallbackUrl(returnTo?: string): string {
 function apiAuthBase(): string {
   const base = env.apiBaseUrl?.replace(/\/$/, "");
   if (base) return base;
-  return typeof window !== "undefined"
-    ? `${window.location.protocol}//${window.location.hostname}:5000`
-    : "http://localhost:5000";
+  // Same-origin via Next.js /api rewrite — keeps OAuth state cookies on the app origin.
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+  return "";
 }
 
 /** OAuth start URL — hits the Express API (not the Next.js origin). */
@@ -128,9 +130,10 @@ export function getOAuthUrl(
   const base = apiAuthBase();
   const path =
     provider === "google"
-      ? `${base}/api/v1/auth/google`
-      : `${base}/api/v1/auth/social/${provider}`;
-  return `${path}?${params.toString()}`;
+      ? "/api/v1/auth/google"
+      : `/api/v1/auth/social/${provider}`;
+  const prefix = base || "";
+  return `${prefix}${path}?${params.toString()}`;
 }
 
 export async function getOAuthUrlAsync(
