@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Mail } from "lucide-react";
 import { getApiErrorMessage } from "@/lib/api";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validations";
 import { forgotPassword } from "@/services/auth.service";
@@ -45,14 +46,18 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          className="border-brand-secondary/60 focus-visible:ring-brand"
-          {...form.register("email")}
-        />
+        <Label htmlFor="email">Email address</Label>
+        <div className="relative">
+          <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@company.com"
+            className="border-brand-secondary/60 pl-9 focus-visible:ring-brand"
+            {...form.register("email")}
+          />
+        </div>
         {form.formState.errors.email ? (
           <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
         ) : null}

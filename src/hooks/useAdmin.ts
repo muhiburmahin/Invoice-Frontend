@@ -14,6 +14,14 @@ import type {
 
 export const adminQueryKey = ["admin"] as const;
 
+export function useUpgradeRequests() {
+  return useQuery({
+    queryKey: [...adminQueryKey, "upgrade-requests"],
+    queryFn: () => adminService.listUpgradeRequests(),
+    staleTime: 15_000,
+  });
+}
+
 export function usePlatformStats(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: [...adminQueryKey, "stats"],

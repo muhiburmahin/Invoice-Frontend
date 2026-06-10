@@ -6,10 +6,12 @@ import { useMarketingHome } from "@/components/modules/home/hooks/useMarketingHo
 import { useSectionInView } from "@/components/modules/home/hooks/useSectionInView";
 import { AnimatedReveal } from "@/components/modules/home/shared/AnimatedReveal";
 import { HomeSection } from "@/components/modules/home/shared/HomeSection";
-import { buttonVariants } from "@/components/ui/button";
 import { formatCount } from "@/components/modules/home/utils/home-stats";
+import {
+  marketingOutlineOnBrandClass,
+  marketingPrimaryOnBrandClass,
+} from "@/config/marketing-cta";
 import { AUTH_ROUTES } from "@/config/public-routes";
-import { cn } from "@/lib/utils";
 
 export function FinalCtaSection() {
   const { ref, inView } = useSectionInView();
@@ -45,22 +47,10 @@ export function FinalCtaSection() {
               )}
             </p>
             <div className="relative mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link
-                href={AUTH_ROUTES.register}
-                className={cn(
-                  buttonVariants({ size: "lg" }),
-                  "h-12 rounded-full bg-white px-8 font-bold text-brand transition-transform hover:scale-[1.02] hover:bg-brand-secondary",
-                )}
-              >
+              <Link href={AUTH_ROUTES.register} className={marketingPrimaryOnBrandClass}>
                 Create free account
               </Link>
-              <Link
-                href={AUTH_ROUTES.login}
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "lg" }),
-                  "h-12 rounded-full border-white/40 bg-transparent px-8 font-semibold text-white hover:bg-white/10 hover:text-white",
-                )}
-              >
+              <Link href={AUTH_ROUTES.login} className={marketingOutlineOnBrandClass}>
                 Sign in
               </Link>
             </div>

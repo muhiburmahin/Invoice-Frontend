@@ -5,9 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { DASHBOARD_HOME, isProtectedRoute } from "@/config/public-routes";
+import { isProtectedRoute } from "@/config/public-routes";
 import { useAuth } from "@/hooks/useAuth";
 import { getApiErrorMessage } from "@/lib/api";
+import { getDefaultHomeForRole } from "@/lib/roles";
+import { useAuthStore } from "@/store/authStore";
 
 function OAuthCallbackHandler() {
   const router = useRouter();
@@ -37,10 +39,12 @@ function OAuthCallbackHandler() {
 
         toast.success("Signed in with Google");
         const from = searchParams.get("from");
+        const role = useAuthStore.getState().session?.role;
+        const defaultHome = getDefaultHomeForRole(role);
         const destination =
           from && from.startsWith("/") && !from.startsWith("//") && isProtectedRoute(from)
             ? from
-            : DASHBOARD_HOME;
+            : defaultHome;
         router.replace(destination);
       } catch (e) {
         if (cancelled) return;
@@ -57,8 +61,10 @@ function OAuthCallbackHandler() {
   useEffect(() => {
     if (isAuthenticated) {
       const from = searchParams.get("from");
+      const role = useAuthStore.getState().session?.role;
+      const defaultHome = getDefaultHomeForRole(role);
       const destination =
-        from && from.startsWith("/") && isProtectedRoute(from) ? from : DASHBOARD_HOME;
+        from && from.startsWith("/") && isProtectedRoute(from) ? from : defaultHome;
       router.replace(destination);
     }
   }, [isAuthenticated, router, searchParams]);

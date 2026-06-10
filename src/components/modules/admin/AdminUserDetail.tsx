@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { AdminNav } from "@/components/modules/admin/AdminNav";
+import { SupportAccessBanner } from "@/components/modules/admin/SupportAccessBanner";
 import { SimpleModal } from "@/components/shared/SimpleModal";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Badge } from "@/components/ui/badge";
@@ -135,12 +135,12 @@ export function AdminUserDetail({ id }: AdminUserDetailProps) {
 
   return (
     <div className="space-y-6">
-      <AdminNav />
-
       <Button variant="ghost" size="sm" render={<Link href="/admin/users" />}>
         <ArrowLeft className="size-4" />
         All users
       </Button>
+
+      <SupportAccessBanner context="user-detail" />
 
       <Card>
         <CardHeader>
@@ -206,7 +206,7 @@ export function AdminUserDetail({ id }: AdminUserDetailProps) {
           <CardDescription>
             {superAdmin
               ? "Full admin actions available."
-              : "Read-only access — contact a super admin for plan or role changes."}
+              : "Support can send a password reset email only."}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">

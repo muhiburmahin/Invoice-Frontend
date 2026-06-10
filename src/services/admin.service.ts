@@ -94,4 +94,18 @@ export const adminService = {
 
   runJobs: (body: RunScheduledJobsInput = {}) =>
     apiPost<Record<string, unknown>>("/api/v1/admin/jobs/run", body),
+
+  listUpgradeRequests: () =>
+    apiGet<{
+      requests: {
+        id: string;
+        userId: string;
+        userName: string;
+        userEmail: string;
+        plan: string;
+        paymentReference: string | null;
+        note: string | null;
+        requestedAt: string;
+      }[];
+    }>("/api/v1/admin/upgrade-requests"),
 };

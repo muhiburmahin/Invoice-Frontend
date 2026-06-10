@@ -2,16 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home } from "lucide-react";
+import { Home, Shield } from "lucide-react";
 
 import { isNavActive, mainNavItems } from "@/config/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { isStaff } from "@/lib/roles";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { plan, workspace } = useAuth();
+  const { plan, workspace, user } = useAuth();
+  const staff = isStaff(user?.role);
 
   return (
     <aside className="hidden h-full w-64 shrink-0 flex-col border-r border-brand-secondary/40 bg-sidebar md:flex">
@@ -63,6 +65,15 @@ export function Sidebar() {
       </nav>
 
       <div className="space-y-2 border-t border-brand-secondary/40 p-3">
+        {staff ? (
+          <Link
+            href="/admin"
+            className="flex items-center gap-2 rounded-lg border border-brand-secondary/60 bg-brand-secondary/30 px-3 py-2.5 text-sm font-medium text-brand transition-colors hover:bg-brand-secondary/60"
+          >
+            <Shield className="size-4 shrink-0" />
+            Admin console
+          </Link>
+        ) : null}
         <Link
           href="/"
           className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-brand-secondary/60 hover:text-brand"

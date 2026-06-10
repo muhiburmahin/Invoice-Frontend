@@ -4,16 +4,13 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRight,
-  ExternalLink,
   FileText,
   Plus,
   RefreshCw,
-  Shield,
   Sparkles,
   Users,
 } from "lucide-react";
 
-import { PlatformCharts } from "@/components/modules/admin/charts/PlatformCharts";
 import { RecentInvoices } from "@/components/modules/dashboard/RecentInvoices";
 import { RevenueChart } from "@/components/modules/dashboard/RevenueChart";
 import { InvoiceStatusChart } from "@/components/modules/dashboard/InvoiceStatusChart";
@@ -38,8 +35,6 @@ import { formatCurrency } from "@/lib/utils";
 export function DashboardHome() {
   const { user, plan, workspace } = useAuth();
   const { data, isLoading, isError, refetch, isFetching } = useDashboard();
-  const staffUser = isStaff(user?.role);
-  const { data: platformData } = usePlatformStats({ enabled: staffUser });
 
   if (isLoading) {
     return <LoadingSkeleton rows={8} />;
@@ -185,30 +180,6 @@ export function DashboardHome() {
           monthlyCreated={data.invoiceStats.monthlyCreated}
         />
       </section>
-
-      {staffUser && platformData?.stats ? (
-        <section className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Shield className="size-5 text-brand" />
-              <div>
-                <h3 className="text-lg font-semibold tracking-tight">Platform overview</h3>
-                <p className="text-sm text-muted-foreground">
-                  Super-admin metrics across all users
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/admin"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
-            >
-              Full admin panel
-              <ExternalLink className="size-3.5" />
-            </Link>
-          </div>
-          <PlatformCharts stats={platformData.stats} />
-        </section>
-      ) : null}
 
       {/* Section 6: Overdue alert */}
       {data.overdueInvoices.length > 0 ? (

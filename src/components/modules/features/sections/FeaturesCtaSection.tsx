@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useFeaturesSection } from "@/components/modules/features/hooks/useFeaturesSection";
 import { AnimatedReveal } from "@/components/modules/home/shared/AnimatedReveal";
 import { HomeSection } from "@/components/modules/home/shared/HomeSection";
-import { buttonVariants } from "@/components/ui/button";
 import { formatCount } from "@/components/modules/home/utils/home-stats";
+import {
+  marketingOutlineOnBrandClass,
+  marketingPrimaryOnBrandClass,
+} from "@/config/marketing-cta";
 import { AUTH_ROUTES } from "@/config/public-routes";
-import { cn } from "@/lib/utils";
 
 export function FeaturesCtaSection() {
   const { ref, stats, features, isLoading, isError } = useFeaturesSection();
@@ -44,22 +46,10 @@ export function FeaturesCtaSection() {
               )}
             </p>
             <div className="relative mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link
-                href={AUTH_ROUTES.register}
-                className={cn(
-                  buttonVariants({ size: "lg" }),
-                  "rounded-full bg-white px-8 font-bold text-brand transition-transform hover:scale-[1.02] hover:bg-brand-secondary",
-                )}
-              >
+              <Link href={AUTH_ROUTES.register} className={marketingPrimaryOnBrandClass}>
                 Create free account
               </Link>
-              <Link
-                href="/pricing"
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "lg" }),
-                  "rounded-full border-white/40 text-white hover:bg-white/10 hover:text-white",
-                )}
-              >
+              <Link href="/pricing" className={marketingOutlineOnBrandClass}>
                 Compare plans
               </Link>
             </div>

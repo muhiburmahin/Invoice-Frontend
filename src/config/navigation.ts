@@ -87,7 +87,7 @@ export const routeLabels: Record<string, string> = {
   "/settings/billing": "Billing",
   "/settings/account": "Account",
   "/settings/notifications": "Notifications",
-  "/admin": "Admin",
+  "/admin": "Overview",
   "/admin/users": "Users",
   "/admin/activity-logs": "Activity logs",
   "/admin/jobs": "Scheduled jobs",
@@ -108,6 +108,26 @@ export function getPageTitle(pathname: string): string {
 }
 
 export function getBreadcrumbs(pathname: string): { href: string; label: string }[] {
+  if (pathname.startsWith("/admin")) {
+    const crumbs: { href: string; label: string }[] = [
+      { href: "/admin", label: "Admin" },
+    ];
+    if (pathname === "/admin") return crumbs;
+
+    const segments = pathname.split("/").filter(Boolean);
+    let path = "";
+    for (const segment of segments) {
+      path += `/${segment}`;
+      const label = routeLabels[path];
+      if (label && path !== "/admin") {
+        crumbs.push({ href: path, label });
+      } else if (segments.indexOf(segment) === segments.length - 1 && path !== "/admin") {
+        crumbs.push({ href: path, label: getPageTitle(pathname) });
+      }
+    }
+    return crumbs;
+  }
+
   const crumbs: { href: string; label: string }[] = [
     { href: "/dashboard", label: "Home" },
   ];

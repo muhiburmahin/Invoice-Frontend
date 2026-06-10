@@ -1,22 +1,21 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Menu, Shield, X } from "lucide-react";
+import { Home, LayoutGrid, Menu, X } from "lucide-react";
 import { useState } from "react";
 
-import { isNavActive, mainNavItems } from "@/config/navigation";
+import { adminNavItems, isAdminNavActive } from "@/config/admin-navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { isStaff } from "@/lib/roles";
-import { Badge } from "@/components/ui/badge";
+import { isSuperAdmin } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export function MobileSidebar() {
+export function AdminMobileSidebar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const { plan, user } = useAuth();
-  const staff = isStaff(user?.role);
+  const { user } = useAuth();
+  const superAdmin = isSuperAdmin(user?.role);
 
   return (
     <div className="md:hidden">
@@ -24,7 +23,7 @@ export function MobileSidebar() {
         variant="ghost"
         size="icon"
         onClick={() => setOpen((o) => !o)}
-        aria-label={open ? "Close menu" : "Open menu"}
+        aria-label={open ? "Close admin menu" : "Open admin menu"}
       >
         {open ? <X className="size-5" /> : <Menu className="size-5" />}
       </Button>
@@ -37,42 +36,35 @@ export function MobileSidebar() {
           />
           <nav
             className="fixed inset-x-0 top-16 z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-brand-secondary/40 bg-background/98 p-3 shadow-xl backdrop-blur-md"
-            aria-label="Mobile navigation"
+            aria-label="Admin mobile navigation"
           >
-            {mainNavItems.map(({ href, label, icon: Icon, badge }) => {
-              const active = isNavActive(pathname, href);
+            {adminNavItems.map((item) => {
+              if (item.superAdminOnly && !superAdmin) return null;
+              const active = isAdminNavActive(pathname, item.href, item.exact);
+              const Icon = item.icon;
               return (
                 <Link
-                  key={href}
-                  href={href}
+                  key={item.href}
+                  href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
                     "mb-1 flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium",
-                    active
-                      ? "bg-brand text-brand-foreground"
-                      : "hover:bg-brand-secondary/60",
+                    active ? "bg-brand text-brand-foreground" : "hover:bg-brand-secondary/60",
                   )}
                 >
                   <Icon className="size-4" />
-                  {label}
-                  {badge ? (
-                    <Badge variant="secondary" className="ml-auto text-[10px]">
-                      {badge}
-                    </Badge>
-                  ) : null}
+                  {item.label}
                 </Link>
               );
             })}
-            {staff ? (
-              <Link
-                href="/admin"
-                onClick={() => setOpen(false)}
-                className="mb-1 flex items-center gap-2 rounded-lg border border-brand-secondary/60 bg-brand-secondary/30 px-3 py-2.5 text-sm font-medium text-brand"
-              >
-                <Shield className="size-4" />
-                Admin console
-              </Link>
-            ) : null}
+            <Link
+              href="/dashboard"
+              onClick={() => setOpen(false)}
+              className="mb-1 flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-brand-secondary/60"
+            >
+              <LayoutGrid className="size-4" />
+              My business app
+            </Link>
             <Link
               href="/"
               onClick={() => setOpen(false)}
@@ -81,10 +73,6 @@ export function MobileSidebar() {
               <Home className="size-4" />
               Website home
             </Link>
-            <div className="mt-3 rounded-lg bg-brand-secondary/50 px-3 py-2 text-center text-sm">
-              <span className="text-muted-foreground">Plan: </span>
-              <span className="font-semibold text-brand">{plan}</span>
-            </div>
           </nav>
         </>
       ) : null}

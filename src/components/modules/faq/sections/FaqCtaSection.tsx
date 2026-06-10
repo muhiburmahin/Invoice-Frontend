@@ -29,12 +29,18 @@ export function FaqCtaSection() {
                 href={AUTH_ROUTES.register}
                 className={cn(
                   buttonVariants(),
-                  "bg-brand text-brand-foreground hover:bg-brand/90",
+                  "bg-brand text-brand-foreground hover:bg-brand/90 hover:text-brand-foreground",
                 )}
               >
                 Create account
               </Link>
-              <Link href="/contact" className={buttonVariants({ variant: "outline" })}>
+              <Link
+                href="/contact"
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "hover:bg-brand-secondary/40 hover:text-brand",
+                )}
+              >
                 Contact us
               </Link>
             </div>

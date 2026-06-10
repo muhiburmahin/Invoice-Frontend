@@ -3,6 +3,8 @@ import type {
   BillingMeta,
   BillingSubscriptionResponse,
   BillingUsageResponse,
+  OfflineBillingInfo,
+  OfflineUpgradeRequestInput,
   UpgradeablePlan,
 } from "@/types/billing";
 
@@ -33,4 +35,13 @@ export const billingService = {
     apiPost<{ portalUrl: string }>("/api/v1/billing/portal", {
       returnUrl: billingReturnUrl("/settings/billing"),
     }),
+
+  offlineInfo: () =>
+    apiGet<{ offline: OfflineBillingInfo }>("/api/v1/billing/offline-info"),
+
+  offlineRequest: (body: OfflineUpgradeRequestInput) =>
+    apiPost<{ message: string; pending: boolean }>(
+      "/api/v1/billing/offline-request",
+      body,
+    ),
 };

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 
-import { AdminNav } from "@/components/modules/admin/AdminNav";
+import { SupportAccessBanner } from "@/components/modules/admin/SupportAccessBanner";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,7 @@ export function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <AdminNav />
+      <SupportAccessBanner context="users" />
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="relative max-w-sm flex-1">

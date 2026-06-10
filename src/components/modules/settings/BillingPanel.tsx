@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { OfflineUpgradeCard } from "@/components/modules/settings/OfflineUpgradeCard";
 import { SettingsNav } from "@/components/modules/settings/SettingsNav";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Button } from "@/components/ui/button";
@@ -101,6 +102,9 @@ export function BillingPanel() {
   const usage = usageQuery.data?.usage;
   const meta = metaQuery.data;
   const saas = meta?.saas;
+  const activePlan = subscription?.plan ?? currentPlan;
+  const offlineUpgrade = saas?.offlineUpgrade;
+  const pendingOfflineUpgrade = saas?.pendingOfflineUpgrade ?? false;
 
   useEffect(() => {
     const checkoutStatus = searchParams.get("checkout");
@@ -196,6 +200,16 @@ export function BillingPanel() {
         </CardContent>
       </Card>
 
+      {offlineUpgrade?.enabled &&
+      activePlan === "FREE" &&
+      !saas?.subscriptionCheckoutAvailable ? (
+        <OfflineUpgradeCard
+          offline={offlineUpgrade}
+          pending={pendingOfflineUpgrade}
+          currentPlan={activePlan}
+        />
+      ) : null}
+
       {usage && limits ? (
         <Card>
           <CardHeader>
@@ -284,19 +298,30 @@ export function BillingPanel() {
                     <li key={feature}>· {feature}</li>
                   ))}
                 </ul>
-                {upgradeable ? (
-                  <Button
-                    className="w-full bg-brand text-brand-foreground"
-                    onClick={() => void handleUpgrade(planKey as UpgradeablePlan)}
-                    disabled={checkout.isPending}
-                  >
-                    {checkout.isPending ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <ArrowUpRight className="size-4" />
-                    )}
-                    Upgrade to {PLAN_LABELS[planKey]}
-                  </Button>
+                {!isCurrent && planKey !== "FREE" ? (
+                  upgradeable ? (
+                    <Button
+                      className="w-full bg-brand text-brand-foreground"
+                      onClick={() => void handleUpgrade(planKey as UpgradeablePlan)}
+                      disabled={checkout.isPending}
+                    >
+                      {checkout.isPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <ArrowUpRight className="size-4" />
+                      )}
+                      Upgrade to {PLAN_LABELS[planKey]} with Stripe
+                    </Button>
+                  ) : planKey === "PRO" && offlineUpgrade?.enabled ? (
+                    <p className="rounded-lg border border-brand-secondary/50 bg-brand-secondary/20 px-3 py-2.5 text-xs text-muted-foreground">
+                      Use the <strong className="text-foreground">offline payment</strong> section
+                      above to pay via bKash/bank and request activation.
+                    </p>
+                  ) : (
+                    <p className="rounded-lg border border-dashed border-brand-secondary/60 bg-muted/30 px-3 py-2.5 text-xs text-muted-foreground">
+                      Online checkout is not configured. Contact support to upgrade.
+                    </p>
+                  )
                 ) : null}
               </CardContent>
             </Card>
@@ -304,11 +329,14 @@ export function BillingPanel() {
         })}
       </div>
 
-      {saas && !saas.subscriptionCheckoutAvailable ? (
+      {saas &&
+      !saas.subscriptionCheckoutAvailable &&
+      !offlineUpgrade?.enabled &&
+      activePlan === "FREE" ? (
         <Card className="border-amber-500/30 bg-amber-500/5">
           <CardContent className="py-4 text-sm text-muted-foreground">
-            Stripe billing is not configured on this server. Contact your
-            administrator to enable plan upgrades.
+            Online checkout is not configured. Enable offline billing in backend .env or
+            contact your administrator.
           </CardContent>
         </Card>
       ) : null}

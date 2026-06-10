@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { AdminNav } from "@/components/modules/admin/AdminNav";
+import { SupportAccessBanner } from "@/components/modules/admin/SupportAccessBanner";
 import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,7 @@ export function AdminActivityLogsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminNav />
+      <SupportAccessBanner context="logs" />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Input

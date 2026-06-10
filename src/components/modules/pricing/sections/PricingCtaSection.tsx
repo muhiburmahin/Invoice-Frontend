@@ -5,9 +5,11 @@ import Link from "next/link";
 import { usePricingSection } from "@/components/modules/pricing/hooks/usePricingSection";
 import { AnimatedReveal } from "@/components/modules/home/shared/AnimatedReveal";
 import { HomeSection } from "@/components/modules/home/shared/HomeSection";
-import { buttonVariants } from "@/components/ui/button";
+import {
+  marketingOutlineOnBrandClass,
+  marketingPrimaryOnBrandClass,
+} from "@/config/marketing-cta";
 import { AUTH_ROUTES } from "@/config/public-routes";
-import { cn } from "@/lib/utils";
 
 export function PricingCtaSection() {
   const { ref, isLoading, isError } = usePricingSection();
@@ -32,22 +34,10 @@ export function PricingCtaSection() {
                   : "Create your account in minutes. Upgrade only when your business grows."}
             </p>
             <div className="relative mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link
-                href={AUTH_ROUTES.register}
-                className={cn(
-                  buttonVariants({ size: "lg" }),
-                  "rounded-full bg-white px-8 font-bold text-brand transition-transform hover:scale-[1.02]",
-                )}
-              >
+              <Link href={AUTH_ROUTES.register} className={marketingPrimaryOnBrandClass}>
                 Create free account
               </Link>
-              <Link
-                href="/contact"
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "lg" }),
-                  "rounded-full border-white/40 text-white hover:bg-white/10",
-                )}
-              >
+              <Link href="/contact" className={marketingOutlineOnBrandClass}>
                 Contact sales
               </Link>
             </div>

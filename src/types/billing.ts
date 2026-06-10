@@ -22,6 +22,23 @@ export type Subscription = {
   updatedAt: string;
 };
 
+export type OfflineBillingInfo = {
+  enabled: boolean;
+  plans: ("PRO")[];
+  pro: {
+    price: string;
+    currency: string;
+    label: string;
+  };
+  paymentMethods: {
+    bkash: string | null;
+    nagad: string | null;
+    bankName: string | null;
+    bankAccount: string | null;
+  };
+  instructions: string;
+};
+
 export type BillingMeta = {
   invoicePayments: {
     configured: boolean;
@@ -33,7 +50,15 @@ export type BillingMeta = {
     pricesConfigured: { PRO: boolean; ENTERPRISE: boolean };
     subscriptionCheckoutAvailable: boolean;
     portalAvailable: boolean;
+    offlineUpgrade: OfflineBillingInfo;
+    pendingOfflineUpgrade?: boolean;
   };
+};
+
+export type OfflineUpgradeRequestInput = {
+  plan: "PRO";
+  paymentReference: string;
+  note?: string;
 };
 
 export type UpgradeablePlan = "PRO" | "ENTERPRISE";

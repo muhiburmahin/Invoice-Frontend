@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
+import { AuthPageShell } from "@/components/modules/auth/AuthPageShell";
 import { LoginForm } from "@/components/modules/auth/LoginForm";
-import { AuthCard } from "@/components/layout/auth-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthConfig } from "@/services/auth.service";
 
@@ -16,12 +16,13 @@ export default function LoginPage() {
   });
 
   return (
-    <AuthCard
+    <AuthPageShell
+      variant="login"
       title="Sign in"
-      description="Use Google or your email to access your workspace"
+      description="Business owners and platform staff use the same login — choose your account type below."
       footer={
         <span>
-          New here?{" "}
+          New business?{" "}
           <Link href="/auth/register" className="font-medium text-brand hover:underline">
             Create an account
           </Link>
@@ -42,6 +43,6 @@ export default function LoginPage() {
           }}
         />
       )}
-    </AuthCard>
+    </AuthPageShell>
   );
 }

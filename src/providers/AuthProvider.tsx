@@ -5,6 +5,7 @@ import { Suspense, useCallback, useEffect, type ReactNode } from "react";
 
 import { AUTH_ROUTES, DASHBOARD_HOME, isProtectedRoute } from "@/config/public-routes";
 import { getApiErrorMessage, isUnauthorized } from "@/lib/api";
+import { getDefaultHomeForRole } from "@/lib/roles";
 import {
   getAuthMe,
   getWorkspaceMe,
@@ -103,10 +104,11 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
 
       await refresh();
       const from = searchParams.get("from");
+      const defaultHome = getDefaultHomeForRole(result.role);
       const destination =
         from && from.startsWith("/") && !from.startsWith("//") && isProtectedRoute(from)
           ? from
-          : DASHBOARD_HOME;
+          : defaultHome;
       router.push(destination);
     };
 
@@ -121,7 +123,10 @@ function AuthProviderInner({ children }: { children: ReactNode }) {
       try {
         await logoutApi();
       } catch (e) {
-        console.error(getApiErrorMessage(e));
+        // Session may already be expired — local sign-out still succeeds.
+        if (!isUnauthorized(e)) {
+          console.error(getApiErrorMessage(e));
+        }
       } finally {
         reset();
         router.push(AUTH_ROUTES.login);

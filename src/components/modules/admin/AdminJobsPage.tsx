@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Loader2, Play } from "lucide-react";
 import { toast } from "sonner";
 
-import { AdminNav } from "@/components/modules/admin/AdminNav";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -84,8 +83,6 @@ export function AdminJobsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminNav />
-
       <Card>
         <CardHeader>
           <CardTitle>Run scheduled jobs</CardTitle>

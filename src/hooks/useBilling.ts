@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { dashboardQueryKey } from "@/hooks/useDashboard";
 import { billingService } from "@/services/billing.service";
-import type { UpgradeablePlan } from "@/types/billing";
+import type { OfflineUpgradeRequestInput, UpgradeablePlan } from "@/types/billing";
 
 export const billingMetaQueryKey = ["billing", "meta"] as const;
 export const billingSubscriptionQueryKey = ["billing", "subscription"] as const;
@@ -58,6 +58,20 @@ export function useBillingPortal() {
       if (data.portalUrl) {
         window.location.href = data.portalUrl;
       }
+    },
+  });
+}
+
+export function useOfflineUpgradeRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: OfflineUpgradeRequestInput) =>
+      billingService.offlineRequest(body),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: billingMetaQueryKey });
+      void queryClient.invalidateQueries({ queryKey: billingSubscriptionQueryKey });
+      void queryClient.invalidateQueries({ queryKey: dashboardQueryKey });
     },
   });
 }

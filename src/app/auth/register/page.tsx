@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
+import { AuthPageShell } from "@/components/modules/auth/AuthPageShell";
 import { RegisterForm } from "@/components/modules/auth/RegisterForm";
-import { AuthCard } from "@/components/layout/auth-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthConfig } from "@/services/auth.service";
 
@@ -16,9 +16,10 @@ export default function RegisterPage() {
   });
 
   return (
-    <AuthCard
-      title="Create account"
-      description="Start invoicing in minutes — Google or email"
+    <AuthPageShell
+      variant="register"
+      title="Create business account"
+      description="For freelancers and companies — staff accounts are assigned by an administrator."
       footer={
         <span>
           Already have an account?{" "}
@@ -43,6 +44,6 @@ export default function RegisterPage() {
           }}
         />
       )}
-    </AuthCard>
+    </AuthPageShell>
   );
 }

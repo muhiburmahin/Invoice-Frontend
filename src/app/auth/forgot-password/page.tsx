@@ -3,13 +3,13 @@
 import Link from "next/link";
 
 import { ForgotPasswordForm } from "@/components/modules/auth/ForgotPasswordForm";
-import { AuthCard } from "@/components/layout/auth-card";
+import { AuthPageShell } from "@/components/modules/auth/AuthPageShell";
 
 export default function ForgotPasswordPage() {
   return (
-    <AuthCard
+    <AuthPageShell
       title="Forgot password"
-      description="We'll email you a reset link if the account exists"
+      description="Enter your email — we'll send a reset link if an account exists."
       footer={
         <Link href="/auth/login" className="font-medium text-brand hover:underline">
           Back to sign in
@@ -17,6 +17,6 @@ export default function ForgotPasswordPage() {
       }
     >
       <ForgotPasswordForm />
-    </AuthCard>
+    </AuthPageShell>
   );
 }

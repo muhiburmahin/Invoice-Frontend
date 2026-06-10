@@ -12,6 +12,9 @@ type SocialLoginButtonsProps = {
   google?: boolean;
   github?: boolean;
   className?: string;
+  /** @default true */
+  showDivider?: boolean;
+  dividerLabel?: string;
 };
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -45,7 +48,13 @@ function GitHubIcon({ className }: { className?: string }) {
   );
 }
 
-function SocialLoginButtonsInner({ google, github, className }: SocialLoginButtonsProps) {
+function SocialLoginButtonsInner({
+  google,
+  github,
+  className,
+  showDivider = true,
+  dividerLabel = "or continue with",
+}: SocialLoginButtonsProps) {
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
   const returnTo =
@@ -55,12 +64,14 @@ function SocialLoginButtonsInner({ google, github, className }: SocialLoginButto
 
   return (
     <div className={cn("space-y-4", className)}>
-      <div className="relative">
-        <Separator className="bg-brand-secondary" />
-        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-          or continue with
-        </span>
-      </div>
+      {showDivider ? (
+        <div className="relative">
+          <Separator className="bg-brand-secondary" />
+          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
+            {dividerLabel}
+          </span>
+        </div>
+      ) : null}
       <div className={cn("grid gap-2", google && github ? "sm:grid-cols-2" : "grid-cols-1")}>
         {google ? (
           <a

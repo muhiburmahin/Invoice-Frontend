@@ -24,6 +24,7 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 
 import { BrandLogo } from "@/components/layout/BrandLogo";
+import { AdminMobileSidebar } from "@/components/layout/AdminMobileSidebar";
 import { MobileSidebar } from "@/components/layout/MobileSidebar";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useNavbarScroll } from "@/hooks/useNavbarScroll";
@@ -50,7 +51,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isStaff } from "@/lib/roles";
+import { ADMIN_HOME, isStaff, roleLabel } from "@/lib/roles";
 import { cn } from "@/lib/utils";
 import type { NotificationItem } from "@/types";
 
@@ -70,12 +71,22 @@ const appSearchRoutes = [
   { href: "/settings", label: "Settings", keywords: "account business" },
 ];
 
+const adminSearchRoutes = [
+  { href: ADMIN_HOME, label: "Admin overview", keywords: "platform stats dashboard" },
+  { href: "/admin/users", label: "Users", keywords: "accounts members" },
+  { href: "/admin/activity-logs", label: "Activity logs", keywords: "audit trail" },
+  { href: "/admin/jobs", label: "Scheduled jobs", keywords: "background tasks cron" },
+  { href: DASHBOARD_HOME, label: "My business app", keywords: "invoices clients workspace" },
+  { href: "/", label: "Website home", keywords: "marketing landing homepage public" },
+];
+
 function useNavbarMode() {
   const pathname = usePathname();
   const isPortal = pathname.startsWith("/portal");
+  const isAdmin = pathname.startsWith("/admin");
   const isApp =
-    isProtectedRoute(pathname) && !isPortal && !pathname.startsWith("/admin");
-  return { isApp, isPortal, pathname };
+    isProtectedRoute(pathname) && !isPortal && !isAdmin;
+  return { isApp, isPortal, isAdmin, pathname };
 }
 
 function getInitials(name?: string | null) {
@@ -175,9 +186,14 @@ function ProfileMenu({
               <span className="truncate text-xs font-normal text-muted-foreground">
                 {user?.email}
               </span>
-              <Badge variant="secondary" className="w-fit text-[10px] uppercase tracking-wide">
-                {plan} plan
-              </Badge>
+              <div className="flex flex-wrap gap-1.5">
+                <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
+                  {plan} plan
+                </Badge>
+                <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
+                  {roleLabel(user?.role)}
+                </Badge>
+              </div>
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
@@ -186,9 +202,15 @@ function ProfileMenu({
           <Home className="size-4" />
           Website home
         </DropdownMenuItem>
+        {staff ? (
+          <DropdownMenuItem onClick={() => router.push(ADMIN_HOME)}>
+            <Shield className="size-4" />
+            Admin console
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem onClick={() => router.push(DASHBOARD_HOME)}>
           <LayoutDashboard className="size-4" />
-          Dashboard
+          My business
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push("/settings/billing")}>
           <CreditCard className="size-4" />
@@ -202,12 +224,6 @@ function ProfileMenu({
           <Settings className="size-4" />
           Settings
         </DropdownMenuItem>
-        {staff ? (
-          <DropdownMenuItem onClick={() => router.push("/admin")}>
-            <Shield className="size-4" />
-            Admin console
-          </DropdownMenuItem>
-        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => void logout()}
@@ -233,11 +249,10 @@ function AuthButtons({
       <Link
         href={AUTH_ROUTES.login}
         className={cn(
-          buttonVariants({ variant: "ghost", size: stacked ? "lg" : "default" }),
-          "min-h-11 rounded-full font-bold",
-          stacked && "h-12 w-full justify-center",
+          "inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm font-bold transition-colors",
+          stacked && "h-12 w-full",
           scrolled
-            ? "text-white hover:bg-white/20 hover:text-white"
+            ? "text-white hover:bg-white/15 hover:text-white"
             : "text-foreground hover:bg-brand-secondary/60",
         )}
       >
@@ -246,12 +261,11 @@ function AuthButtons({
       <Link
         href={AUTH_ROUTES.register}
         className={cn(
-          buttonVariants({ size: stacked ? "lg" : "default" }),
-          "min-h-11 rounded-full px-6 font-bold shadow-lg",
-          stacked && "h-12 w-full justify-center",
+          "inline-flex min-h-11 items-center justify-center rounded-full px-6 text-sm font-bold shadow-lg transition-colors",
+          stacked && "h-12 w-full",
           scrolled
-            ? "bg-white text-brand hover:bg-brand-secondary"
-            : "bg-brand text-brand-foreground hover:bg-brand/90",
+            ? "bg-white text-brand shadow-white/20 hover:bg-brand-secondary hover:text-brand-secondary-foreground"
+            : "bg-brand text-brand-foreground shadow-brand/20 hover:bg-brand/85",
         )}
       >
         Get started
@@ -289,12 +303,23 @@ function AuthSection({
   return <AuthButtons stacked={stacked} scrolled={scrolled} />;
 }
 
-function NavbarSearch({ mode }: { mode: "app" | "marketing" }) {
+function NavbarSearch({
+  mode,
+  onBrand = false,
+}: {
+  mode: "app" | "admin" | "marketing";
+  onBrand?: boolean;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  const routes = mode === "app" ? appSearchRoutes : marketingNavItems.map((m) => ({
+  const routes =
+    mode === "admin"
+      ? adminSearchRoutes
+      : mode === "app"
+        ? appSearchRoutes
+        : marketingNavItems.map((m) => ({
     href: m.href,
     label: m.label,
     keywords: m.label,
@@ -332,24 +357,51 @@ function NavbarSearch({ mode }: { mode: "app" | "marketing" }) {
         type="button"
         variant="ghost"
         size="icon"
-        className="size-11 shrink-0 md:hidden"
+        className={cn(
+          "size-11 shrink-0",
+          mode === "marketing" ? "inline-flex xl:hidden" : "md:hidden",
+          onBrand && "text-white hover:bg-white/15 hover:text-white",
+        )}
         aria-label="Search"
         onClick={() => setOpen(true)}
       >
         <Search className="size-5" />
       </Button>
 
-      <div className="relative hidden md:block">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <div
+        className={cn(
+          "relative hidden shrink-0",
+          mode === "marketing" ? "xl:block" : "md:block",
+        )}
+      >
+        <Search
+          className={cn(
+            "pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2",
+            onBrand ? "text-white/70" : "text-muted-foreground",
+          )}
+        />
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setOpen(true)}
           placeholder="Search…"
-          className="h-10 w-48 border-brand-secondary/50 bg-muted/40 pl-9 lg:w-64"
+          className={cn(
+            "h-10 pl-9",
+            mode === "marketing" ? "w-44 2xl:w-56" : "w-48 lg:w-64",
+            onBrand
+              ? "border-white/25 bg-white/10 text-white placeholder:text-white/60"
+              : "border-brand-secondary/50 bg-muted/40",
+          )}
           aria-label="Search"
         />
-        <kbd className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded border bg-background px-1.5 text-[10px] text-muted-foreground lg:inline">
+        <kbd
+          className={cn(
+            "pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded border px-1.5 text-[10px] 2xl:inline",
+            onBrand
+              ? "border-white/25 bg-white/10 text-white/70"
+              : "border-border bg-background text-muted-foreground",
+          )}
+        >
           ⌘K
         </kbd>
         {open && query ? (
@@ -574,66 +626,65 @@ function PublicNavbar() {
         <SkipLink />
         <div
           className={cn(
-            "mx-auto flex max-w-6xl items-center justify-between px-4 transition-all duration-500 md:px-8",
+            "mx-auto flex w-full max-w-7xl items-center gap-3 px-4 transition-all duration-500 md:gap-4 md:px-8",
             scrolled ? "h-14" : "h-20",
           )}
         >
-          <div className="flex min-w-0 flex-1 items-center gap-6 lg:gap-10">
-            <BrandLogo scrolled={scrolled} />
+          <BrandLogo scrolled={scrolled} />
 
-            <div className="hidden items-center gap-1 lg:flex">
-              {PUBLIC_NAV.map((link) => {
-                const isActive = pathname === link.href;
-                const Icon = "icon" in link ? link.icon : null;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      "relative px-4 py-2 text-sm font-bold transition-colors duration-300",
-                      scrolled
-                        ? isActive
-                          ? "text-white"
-                          : "text-brand-secondary hover:text-white"
-                        : isActive
-                          ? "text-brand"
-                          : "text-muted-foreground hover:text-brand",
-                    )}
-                  >
-                    <span className="relative z-10 flex items-center gap-1.5">
-                      {Icon ? <Icon className="size-4 opacity-80" /> : null}
-                      {link.label}
-                    </span>
-                    {isActive ? (
-                      <span
-                        className={cn(
-                          "absolute inset-0 rounded-full transition-colors",
-                          scrolled ? "bg-white/20" : "bg-brand-secondary/70",
-                        )}
-                      />
-                    ) : null}
-                  </Link>
-                );
-              })}
-              {isAuthenticated ? (
+          <nav
+            className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex xl:gap-1"
+            aria-label="Primary"
+          >
+            {PUBLIC_NAV.map((link) => {
+              const isActive = pathname === link.href;
+              const Icon = "icon" in link ? link.icon : null;
+              return (
                 <Link
-                  href={DASHBOARD_HOME}
+                  key={link.href}
+                  href={link.href}
                   className={cn(
-                    "relative px-4 py-2 text-sm font-bold transition-colors",
-                    scrolled ? "text-brand-secondary hover:text-white" : "text-muted-foreground hover:text-brand",
-                    pathname.startsWith("/dashboard") && (scrolled ? "text-white" : "text-brand"),
+                    "relative shrink-0 px-2.5 py-2 text-sm font-bold transition-colors duration-300 xl:px-3.5",
+                    scrolled
+                      ? isActive
+                        ? "text-white"
+                        : "text-brand-secondary hover:text-white"
+                      : isActive
+                        ? "text-brand"
+                        : "text-muted-foreground hover:text-brand",
                   )}
                 >
-                  Dashboard
+                  <span className="relative z-10 flex items-center gap-1.5 whitespace-nowrap">
+                    {Icon ? <Icon className="size-4 opacity-80" /> : null}
+                    {link.label}
+                  </span>
+                  {isActive ? (
+                    <span
+                      className={cn(
+                        "absolute inset-0 rounded-full transition-colors",
+                        scrolled ? "bg-white/20" : "bg-brand-secondary/70",
+                      )}
+                    />
+                  ) : null}
                 </Link>
-              ) : null}
-            </div>
-          </div>
+              );
+            })}
+            {isAuthenticated ? (
+              <Link
+                href={DASHBOARD_HOME}
+                className={cn(
+                  "relative shrink-0 px-2.5 py-2 text-sm font-bold transition-colors xl:px-3.5",
+                  scrolled ? "text-brand-secondary hover:text-white" : "text-muted-foreground hover:text-brand",
+                  pathname.startsWith("/dashboard") && (scrolled ? "text-white" : "text-brand"),
+                )}
+              >
+                Dashboard
+              </Link>
+            ) : null}
+          </nav>
 
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <div className="hidden sm:block">
-              <NavbarSearch mode="marketing" />
-            </div>
+          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 lg:ml-0">
+            <NavbarSearch mode="marketing" onBrand={scrolled} />
             <ThemeToggle onBrand={scrolled} className="hidden sm:inline-flex" />
 
             {isAuthenticated ? (
@@ -643,7 +694,7 @@ function PublicNavbar() {
                   unread={unread}
                   onBrand={scrolled}
                 />
-                <AuthSection onBrand={scrolled} />
+                <AuthSection onBrand={scrolled} scrolled={scrolled} />
               </div>
             ) : (
               <div className="hidden items-center gap-2 md:flex">
@@ -758,6 +809,56 @@ function PublicNavbar() {
   );
 }
 
+function AdminNavbar() {
+  const pathname = usePathname();
+  const breadcrumbs = getBreadcrumbs(pathname);
+  const pageTitle = getPageTitle(pathname);
+
+  return (
+    <>
+      <div className="flex min-w-0 flex-1 items-center gap-2 md:gap-3">
+        <AdminMobileSidebar />
+
+        <div className="min-w-0 flex-1 md:hidden">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-brand">Admin</p>
+          <h1 className="truncate text-base font-semibold leading-tight">{pageTitle}</h1>
+        </div>
+
+        <div className="hidden min-w-0 flex-1 flex-col justify-center md:flex">
+          <nav
+            className="flex items-center gap-1 text-xs text-muted-foreground"
+            aria-label="Breadcrumb"
+          >
+            {breadcrumbs.map((crumb, i) => (
+              <span key={crumb.href} className="flex min-w-0 items-center gap-1">
+                {i > 0 ? <ChevronRight className="size-3 shrink-0 opacity-60" /> : null}
+                {i === breadcrumbs.length - 1 ? (
+                  <span className="truncate font-medium text-foreground">{crumb.label}</span>
+                ) : (
+                  <Link
+                    href={crumb.href}
+                    className="truncate transition-colors hover:text-brand"
+                  >
+                    {crumb.label}
+                  </Link>
+                )}
+              </span>
+            ))}
+          </nav>
+          <h1 className="truncate text-base font-semibold">{pageTitle}</h1>
+        </div>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+        <NavbarSearch mode="admin" />
+        <HelpMenu />
+        <ThemeToggle className="hidden sm:inline-flex" />
+        <ProfileMenu showName compact />
+      </div>
+    </>
+  );
+}
+
 function AppNavbar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -844,7 +945,7 @@ function AppNavbar() {
 }
 
 export function Navbar() {
-  const { isApp, isPortal } = useNavbarMode();
+  const { isApp, isPortal, isAdmin } = useNavbarMode();
   const { scrolled } = useNavbarScroll();
 
   if (isPortal) {
@@ -858,6 +959,14 @@ export function Navbar() {
           <ThemeToggle />
           <AuthSection />
         </div>
+      </AppNavbarShell>
+    );
+  }
+
+  if (isAdmin) {
+    return (
+      <AppNavbarShell scrolled={scrolled}>
+        <AdminNavbar />
       </AppNavbarShell>
     );
   }

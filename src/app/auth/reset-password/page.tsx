@@ -4,28 +4,17 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
-import { AuthCard } from "@/components/layout/auth-card";
+import { AuthPageShell } from "@/components/modules/auth/AuthPageShell";
+import { PasswordInput } from "@/components/modules/auth/PasswordInput";
+import { PasswordStrengthIndicator } from "@/components/modules/auth/PasswordStrengthIndicator";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getApiErrorMessage } from "@/lib/api";
+import { resetPasswordSchema, type ResetPasswordInput } from "@/lib/validations";
 import { resetPassword } from "@/services/auth.service";
-
-const schema = z
-  .object({
-    newPassword: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Confirm your password"),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type FormValues = z.infer<typeof schema>;
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -33,10 +22,13 @@ function ResetPasswordForm() {
   const [done, setDone] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  const form = useForm<ResetPasswordInput>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: { newPassword: "", confirmPassword: "" },
+    mode: "onBlur",
   });
+
+  const passwordValue = form.watch("newPassword");
 
   const onSubmit = form.handleSubmit(async (values) => {
     if (!token) {
@@ -45,11 +37,7 @@ function ResetPasswordForm() {
     }
     setIsSubmitting(true);
     try {
-      const result = await resetPassword({
-        token,
-        newPassword: values.newPassword,
-        confirmPassword: values.confirmPassword,
-      });
+      const result = await resetPassword({ token, ...values });
       setDone(true);
       toast.success(result.message);
     } catch (error) {
@@ -83,34 +71,27 @@ function ResetPasswordForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <div className="space-y-2">
         <Label htmlFor="newPassword">New password</Label>
-        <Input
+        <PasswordInput
           id="newPassword"
-          type="password"
           autoComplete="new-password"
+          placeholder="Create a strong password"
+          error={form.formState.errors.newPassword?.message}
           {...form.register("newPassword")}
         />
-        {form.formState.errors.newPassword ? (
-          <p className="text-sm text-destructive">
-            {form.formState.errors.newPassword.message}
-          </p>
-        ) : null}
+        <PasswordStrengthIndicator password={passwordValue} />
       </div>
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Confirm password</Label>
-        <Input
+        <PasswordInput
           id="confirmPassword"
-          type="password"
           autoComplete="new-password"
+          placeholder="Re-enter your password"
+          error={form.formState.errors.confirmPassword?.message}
           {...form.register("confirmPassword")}
         />
-        {form.formState.errors.confirmPassword ? (
-          <p className="text-sm text-destructive">
-            {form.formState.errors.confirmPassword.message}
-          </p>
-        ) : null}
       </div>
       <Button
         type="submit"
@@ -125,10 +106,10 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <AuthCard title="Reset password" description="Choose a new password">
+    <AuthPageShell title="Reset password" description="Choose a new secure password">
       <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
         <ResetPasswordForm />
       </Suspense>
-    </AuthCard>
+    </AuthPageShell>
   );
 }
